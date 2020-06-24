@@ -1,0 +1,27 @@
+.body {
+  overflow: hidden;
+}
+
+.main-view {
+  border-left-style: solid;
+  border-left-width: 5%;
+  border-left-color: grey;
+}
+
+#main-game {
+  height: 100%;
+  width: 60%;
+  background-color: black;
+}
+
+#next-tetromino {
+  background-color: black;
+}
+
+.main-view .menu {
+  background-color: grey;
+}
+
+.menu p {
+  background-color: white;
+}
