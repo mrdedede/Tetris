@@ -1,13 +1,30 @@
 shapes = {
   // Aqui ficarão todas as possibilidades de formas para os tetrominos
   // Botar os códigos de "batalha naval" pra todos os casos
-  line:
-    [
-      ["b1","b2","b3","b4"],
-      ["a2","b2","c2","d2"],
-      ["c1","c2","c3","c4"],
-      ["a3","b3","c3","d3"],
-    ],
+  line:[
+    ["b1","b2","b3","b4"],
+    ["a2","b2","c2","d2"],
+    ["c1","c2","c3","c4"],
+    ["a3","b3","c3","d3"],
+  ],
+  s:[
+    ["a3","b2","b3","c2"],
+    ["a1","a2","b2","b3"],
+    ["a2","b1","b2","c1"],
+    ["b1","b2","c2","c3"],
+  ],
+  j:[
+    ["a1","b1","b2","b3"],
+    ["a1","a2","b2","c2"],
+    ["b1","b2","b3","c1"],
+    ["a2","b2","c2","c3"],
+  ],
+  square:[
+    ["a1","a2","b1","b2"],
+    ["a1","a2","b1","b2"],
+    ["a1","a2","b1","b2"],
+    ["a1","a2","b1","b2"],
+  ],
 }
 
 Tetromino = {
@@ -15,6 +32,11 @@ Tetromino = {
   shape: "line",
   curIndex: 0,
   shapeMatrix: []
+}
+
+
+function start(){
+  nextPiece();
 }
 
 /**
@@ -47,14 +69,47 @@ function decode(shapeArray) {
  * Gira o tetromino atual
  * @params tetromino {Tetromino} - Objeto tetrominó atual
 */
-function spin(tetromino) {
-	tetromino.curIndex ++;
+function rotate(tetromino) {
+  tetromino.curIndex ++;
+  
   if(tetromino.curIndex > 3) {
     tetromino.curIndex = 0;
   }
+
   return tetromino.shapeMatrix = decode(shapes[tetromino.shape][tetromino.curIndex]);
 }
 
+function nextPiece(){
+  let shapeNames = [],
+      pieceName,
+      piece
+  ;
+
+  for(shape in shapes){
+    shapeNames.push(shape);
+  }
+
+  pieceName = shapeNames[Math.floor(Math.random() * 4)];
+
+  switch (pieceName){
+    case 'line':
+      piece = shapes.line;
+      break;
+    case 'j':
+      piece = shapes.j;
+      break;
+    case 's':
+      piece = shapes.s;
+      break;
+    default:
+      piece = shapes.square;
+      break;
+  }
+
+  return piece;
+}
+
+start();
 
 // Isso vai carregar o jogo só quando tudo estiver carregado na page
 document.addEventListener("DOMContentLoaded", () => {
