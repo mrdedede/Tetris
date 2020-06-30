@@ -1,6 +1,4 @@
 shapes = {
-  // Aqui ficarão todas as possibilidades de formas para os tetrominos
-  // Botar os códigos de "batalha naval" pra todos os casos
   line:[
     ["b1","b2","b3","b4"],
     ["a2","b2","c2","d2"],
@@ -34,9 +32,23 @@ Tetromino = {
   shapeMatrix: []
 }
 
+var figure = {
+  x: 10,
+  y: 10,
+}
 
-function start(){
-  nextPiece();
+/**
+ * Renders the game
+*/
+function render() {
+  var canvas = document.getElementById("main-game");
+  var ctx = canvas.getContext('2d');
+  
+  ctx.clearRect(0,0,canvas.width, canvas.height);
+  ctx.fillRect(figure.x,figure.y,50,50);
+  ctx.fillStyle = 'black';
+
+  
 }
 
 /**
@@ -79,13 +91,16 @@ function rotate(tetromino) {
   return tetromino.shapeMatrix = decode(shapes[tetromino.shape][tetromino.curIndex]);
 }
 
-function nextPiece(){
+/**
+ *Gera uma peça aleatória para o jogador
+*/
+function nextPiece() {
   let shapeNames = [],
       pieceName,
       piece
   ;
 
-  for(shape in shapes){
+  for(shape in shapes) {
     shapeNames.push(shape);
   }
 
@@ -107,6 +122,28 @@ function nextPiece(){
   }
 
   return piece;
+}
+
+
+function start(){
+  	window.addEventListener("keydown",keyListener);
+    
+    render();
+}
+
+function keyListener(event) {
+  let key = event.key;
+  if(key === "A" || key === "a") {
+    figure.x -= 5
+  } else if (key === "D" || key === "d") {
+    figure.x += 5
+  } else if (key === "R" || key === "r") {
+    //rotate()
+  } else if (key === " ") {
+    //pauseGame()
+  }
+  console.log(figure)
+  render()
 }
 
 start();
