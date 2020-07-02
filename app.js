@@ -46,22 +46,40 @@ var moveLeft = false,
 var canvas = document.getElementById("main-game");
 var ctx = canvas.getContext('2d');
 
+function Piece(x,y,width,height) {
+  this.x = x;
+  this.y = y;
+  this.width = width;
+  this.height = height;
+
+  this.draw = function() {
+    ctx.fillRect(this.x,this.y,this.width,this.height);
+    ctx.fillStyle = 'black';
+  }
+
+  this.update = function(){
+    
+    if(this.y < canvas.height - this.height){
+      this.y += 0.5;
+    }else{
+      isFixed = true;
+      //nextPiece();      
+    }
+    
+    this.draw();
+  }
+}
+
+var piece = new Piece(figure.x,figure.y, figure.width, figure.height);
+
 /**
  * Renders the game
 */
 function render() {
   requestAnimationFrame(render);
-  
-  ctx.clearRect(0,0,canvas.width, canvas.height);
-  ctx.fillRect(figure.x,figure.y,figure.width,figure.height);
-  ctx.fillStyle = 'black';
-    
-  if(figure.y < canvas.height - figure.height){
-    figure.y += 0.5;
-  }else{
-    isFixed = true;
-  }
 
+  ctx.clearRect(0,0,canvas.width, canvas.height);
+  piece.update();
 }
 
 /**
@@ -139,13 +157,13 @@ function nextPiece() {
 
 function move(){
   if(moveLeft && !moveRight){
-    if(figure.x > 0){
-      figure.x -= 5;
+    if(piece.x > 0){
+      piece.x -= 5;
     }
     moveLeft = false;
   }else{
-    if(figure.x < canvas.width - figure.width){
-      figure.x += 5;
+    if(piece.x < canvas.width - figure.width){
+      piece.x += 5;
     }
     moveRight = false;
   }
