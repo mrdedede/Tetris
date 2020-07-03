@@ -25,14 +25,7 @@ shapes = {
   ],
 }
 
-Tetromino = {
-  // Aqui está um exemplo base de como funcionariam os tetrominós
-  shape: "line",
-  curIndex: 0,
-  shapeMatrix: []
-}
-
-var figure = {
+var tetromino = {
   x: 125,
   y: -50,
   width: 50,
@@ -46,7 +39,15 @@ var moveLeft = false,
 var canvas = document.getElementById("main-game");
 var ctx = canvas.getContext('2d');
 
-function Piece(x,y,width,height) {
+/**
+ * Cria um novo tetromino
+ *
+ * @param {*} x - O valor da peça na coordenada X
+ * @param {*} y - O valor da peça na coordenada Y
+ * @param {*} width - Largura da peça
+ * @param {*} height - Altura da peça
+ */
+function Piece(x, y, width, height) {
   this.x = x;
   this.y = y;
   this.width = width;
@@ -70,7 +71,7 @@ function Piece(x,y,width,height) {
   }
 }
 
-var piece = new Piece(figure.x,figure.y, figure.width, figure.height);
+var piece = new Piece(tetromino.x,tetromino.y, tetromino.width, tetromino.height);
 
 /**
  * Renders the game
@@ -155,6 +156,9 @@ function nextPiece() {
   return piece;
 }
 
+/**
+ * Move a peça na direção da tecla que está sendo apertada
+ */
 function move(){
   if(moveLeft && !moveRight){
     if(piece.x > 0){
@@ -162,7 +166,7 @@ function move(){
     }
     moveLeft = false;
   }else{
-    if(piece.x < canvas.width - figure.width){
+    if(piece.x < canvas.width - tetromino.width){
       piece.x += 5;
     }
     moveRight = false;
@@ -170,6 +174,10 @@ function move(){
 
 }
 
+/**
+ * Escuta qual tecla está sendo apertada
+ * @param {*} event 
+ */
 function keyListener(event) {
   let key = event.key;
   if(key === "A" || key === "a") {
@@ -192,6 +200,9 @@ function keyListener(event) {
 
 }
 
+/**
+ * Começa o Jogo
+ */
 function start(){
   window.addEventListener("keydown",keyListener);
 
