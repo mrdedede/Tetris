@@ -33,22 +33,53 @@ Tetromino = {
 }
 
 var figure = {
-  x: 10,
-  y: 10,
+  x: 125,
+  y: -50,
+  width: 50,
+  height: 50,
 }
+
+var moveLeft = false, 
+    moveRight = false, 
+    isFixed = false;
+
+var canvas = document.getElementById("main-game");
+var ctx = canvas.getContext('2d');
+
+function Piece(x,y,width,height) {
+  this.x = x;
+  this.y = y;
+  this.width = width;
+  this.height = height;
+
+  this.draw = function() {
+    ctx.fillRect(this.x,this.y,this.width,this.height);
+    ctx.fillStyle = 'black';
+  }
+
+  this.update = function(){
+    
+    if(this.y < canvas.height - this.height){
+      this.y += 0.5;
+    }else{
+      isFixed = true;
+      //nextPiece();      
+    }
+    
+    this.draw();
+  }
+}
+
+var piece = new Piece(figure.x,figure.y, figure.width, figure.height);
 
 /**
  * Renders the game
 */
 function render() {
-  var canvas = document.getElementById("main-game");
-  var ctx = canvas.getContext('2d');
-  
-  ctx.clearRect(0,0,canvas.width, canvas.height);
-  ctx.fillRect(figure.x,figure.y,50,50);
-  ctx.fillStyle = 'black';
+  requestAnimationFrame(render);
 
-  
+  ctx.clearRect(0,0,canvas.width, canvas.height);
+  piece.update();
 }
 
 /**
@@ -124,26 +155,47 @@ function nextPiece() {
   return piece;
 }
 
+function move(){
+  if(moveLeft && !moveRight){
+    if(piece.x > 0){
+      piece.x -= 5;
+    }
+    moveLeft = false;
+  }else{
+    if(piece.x < canvas.width - figure.width){
+      piece.x += 5;
+    }
+    moveRight = false;
+  }
 
-function start(){
-  	window.addEventListener("keydown",keyListener);
-    
-    render();
 }
 
 function keyListener(event) {
   let key = event.key;
   if(key === "A" || key === "a") {
-    figure.x -= 5
+    if(!isFixed){
+      moveLeft = true;
+      move();
+    }
   } else if (key === "D" || key === "d") {
-    figure.x += 5
+    if(!isFixed){
+      moveRight = true;
+      move();
+    }
   } else if (key === "R" || key === "r") {
-    //rotate()
+    if(!isFixed){
+      //rotate()
+    }
   } else if (key === " ") {
     //pauseGame()
   }
-  console.log(figure)
-  render()
+
+}
+
+function start(){
+  window.addEventListener("keydown",keyListener);
+
+  render();
 }
 
 start();
