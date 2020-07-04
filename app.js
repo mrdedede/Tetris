@@ -27,9 +27,9 @@ shapes = {
 
 var tetromino = {
   x: 125,
-  y: -50,
-  width: 50,
-  height: 50,
+  y: -66,
+  width: 66,
+  height: 66,
 }
 
 var moveLeft = false, 
@@ -38,7 +38,9 @@ var moveLeft = false,
 
 var canvas = document.getElementById("main-game");
 var ctx = canvas.getContext('2d');
-
+var nxt = document.getElementById("next-tetromino");
+var ctxNxt = nxt.getContext('2d');
+var newNext;
 /**
  * Cria um novo tetromino
  *
@@ -47,31 +49,32 @@ var ctx = canvas.getContext('2d');
  * @param {*} width - Largura da peça
  * @param {*} height - Altura da peça
  */
-function Piece(x, y, width, height) {
+function Piece(x, y, width, height,shape) {
   this.x = x;
   this.y = y;
   this.width = width;
   this.height = height;
-
-  this.draw = function() {
-    ctx.fillRect(this.x,this.y,this.width,this.height);
-    ctx.fillStyle = 'black';
-  }
+  this.shape = shape;
 
   this.update = function(){
     
-    if(this.y < canvas.height - this.height){
+    if(this.y < 500 - this.height){
       this.y += 0.5;
     }else{
       isFixed = true;
       //nextPiece();      
     }
     
-    this.draw();
+    draw(this.x,this.y,this.shape,ctx);
+
   }
 }
+newNext = nextPiece();
 
-var piece = new Piece(tetromino.x,tetromino.y, tetromino.width, tetromino.height);
+draw(10,10, newNext, ctxNxt);
+
+var piece = new Piece(tetromino.x,tetromino.y, tetromino.width, tetromino.height,newNext);
+
 
 /**
  * Renders the game
@@ -81,6 +84,23 @@ function render() {
 
   ctx.clearRect(0,0,canvas.width, canvas.height);
   piece.update();
+}
+
+function draw(dx,dy,shape,context){
+  var x = dx, y = dy;
+
+  for(var row = 0; row < 4; row++){
+    var column = 0;
+    for(column = 0; column < 4;column++){
+      if(shape[row][column] != 0){
+        context.fillRect(x,y,33,33);
+        context.fillStyle = 'black';
+        x+=33;
+      }
+    }
+    x= dx;
+    y+=33;
+  }
 }
 
 /**
@@ -96,14 +116,16 @@ function decode(shapeArray) {
     [0,0,0,0]
   ];
   for(coordinate of shapeArray) {
-    if(coordinate.charAt(0) == "a") {
-      shapeMatrix[coordinate.charAt(1)][0] = 1;
-    } else if (coordinate.charAt(0) == "b") {
-      shapeMatrix[coordinate.charAt(1)][1] = 1;
-    } else if (coordinate.chatAt(0) == "c") {
-      shapeMatrix[coordinate.charAt(1)][2] = 1;
+    let coordY = coordinate.charAt(1) - 1
+    let coordX = coordinate.charAt(0)
+    if(coordX == "a") {
+      shapeMatrix[coordY][0] = 1;
+    } else if (coordX == "b") {
+      shapeMatrix[coordY][1] = 1;
+    } else if (coordX == "c") {
+      shapeMatrix[coordY][2] = 1;
     } else {
-      shapeMatrix[coordinate.charAt(1)][3] = 1;
+      shapeMatrix[coordY][3] = 1;
     }
   }
   return shapeMatrix;
@@ -153,7 +175,7 @@ function nextPiece() {
       break;
   }
 
-  return piece;
+  return decode(piece[Math.floor(Math.random() * 3)]);
 }
 
 /**
