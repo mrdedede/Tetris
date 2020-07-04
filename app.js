@@ -1,4 +1,6 @@
+// Mapa com todos os formatos de tetrominó possível
 shapes = {
+  // Array com todas as possibilidades de rotação de um tetrominó
   line:[
     ["b1","b2","b3","b4"],
     ["a2","b2","c2","d2"],
@@ -25,6 +27,7 @@ shapes = {
   ],
 }
 
+//Exemplo de um tetrominó
 var tetromino = {
   x: 125,
   y: -66,
@@ -32,15 +35,19 @@ var tetromino = {
   height: 66,
 }
 
+// Variável indicando tipos de movimento que serão usados nas funções a seguir.
 var moveLeft = false, 
     moveRight = false, 
     isFixed = false;
 
+// Canvas do jogo principal
 var canvas = document.getElementById("main-game");
 var ctx = canvas.getContext('2d');
+
+// Canvas da peça que viria em seguida
 var nxt = document.getElementById("next-tetromino");
 var ctxNxt = nxt.getContext('2d');
-var newNext;
+
 /**
  * Cria um novo tetromino
  *
@@ -62,22 +69,28 @@ function Piece(x, y, width, height,shape) {
       this.y += 0.5;
     }else{
       isFixed = true;
-      //nextPiece();      
+      //genNextPiece();      
     }
     
     draw(this.x,this.y,this.shape,ctx);
 
   }
 }
-newNext = nextPiece();
 
-draw(10,10, newNext, ctxNxt);
+// Gera-se a próxima peça
+var nextPiece = genNextPiece();
 
-var piece = new Piece(tetromino.x,tetromino.y, tetromino.width, tetromino.height,newNext);
+// Desenha-se essa nova peça gerada
+draw(10,10, nextPiece, ctxNxt, 100);
+
+var curPiece = genNextPiece();
+
+// Cria-se um objeto para essa peça e o joga no main game.
+var piece = new Piece(tetromino.x,tetromino.y, tetromino.width, tetromino.height, curPiece);
 
 
 /**
- * Renders the game
+ * Renderiza o jogo
 */
 function render() {
   requestAnimationFrame(render);
@@ -86,19 +99,33 @@ function render() {
   piece.update();
 }
 
-function draw(dx,dy,shape,context){
-  var x = dx, y = dy;
-
-  for(var row = 0; row < 4; row++){
+/**
+ * Desenha-se um objeto para o canvas.
+ * 
+ * @param {number} dx - Tamanho da peça em X
+ * @param {number} dy - Tamanho da peça em Y
+ * @param {array} shape - Shape da peça
+ * @param {HTMLElement} context - Context do canvas no qual se insere a peça.
+ * @param {number} center - Centro do canvas
+ */
+function draw(dx, dy, shape, context, center=198) {
+  var x = dx, y = dy
+  // If e Else ainda meio inúteis, mas alguma hora, usaremos para escrever o nextPiece no meio
+  if(center != 198) {
+    console.log("nextPiece")
+  } else {
+    console.log("curPiece")
+  }
+  for(var row = 0; row < 4; row++) {
     var column = 0;
-    for(column = 0; column < 4;column++){
+    for(column = 0; column < 4;column++) {
       if(shape[row][column] != 0){
-        context.fillRect(x,y,33,33);
+        context.fillRect(x, y, 33, 33);
         context.fillStyle = 'black';
-        x+=33;
+        x += 33;
       }
     }
-    x= dx;
+    x = dx;
     y+=33;
   }
 }
@@ -132,9 +159,10 @@ function decode(shapeArray) {
 }
 
 /**
- * Gira o tetromino atual
- * @params tetromino {Tetromino} - Objeto tetrominó atual
-*/
+ * Rotaciona o Tetrominó
+ * 
+ * @param {object} tetromino - Objeto do Tetrominó atual
+ */
 function rotate(tetromino) {
   tetromino.curIndex ++;
   
@@ -146,9 +174,9 @@ function rotate(tetromino) {
 }
 
 /**
- *Gera uma peça aleatória para o jogador
+ * Gera uma peça aleatória para o jogador
 */
-function nextPiece() {
+function genNextPiece() {
   let shapeNames = [],
       pieceName,
       piece
@@ -182,13 +210,13 @@ function nextPiece() {
  * Move a peça na direção da tecla que está sendo apertada
  */
 function move(){
-  if(moveLeft && !moveRight){
+  if(moveLeft && !moveRight) {
     if(piece.x > 0){
       piece.x -= 5;
     }
     moveLeft = false;
-  }else{
-    if(piece.x < canvas.width - tetromino.width){
+  } else {
+    if(piece.x < canvas.width - tetromino.width) {
       piece.x += 5;
     }
     moveRight = false;
@@ -231,8 +259,7 @@ function start(){
   render();
 }
 
-start();
-
 // Isso vai carregar o jogo só quando tudo estiver carregado na page
 document.addEventListener("DOMContentLoaded", () => {
+  start();
 })
