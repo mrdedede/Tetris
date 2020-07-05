@@ -14,10 +14,10 @@ shapes = {
     ["b1","b2","c2","c3"],
   ],
   j:[
-    ["a1","b1","b2","b3"],
-    ["a1","a2","b2","c2"],
-    ["b1","b2","b3","c1"],
     ["a2","b2","c2","c3"],
+    ["b3","c1","c2","c3"],
+    ["a2","a3","b3","c3"],
+    ["b1","b2","b3","c1"],
   ],
   square:[
     ["a1","a2","b1","b2"],
@@ -33,12 +33,18 @@ var tetromino = {
   y: -66,
   width: 66,
   height: 66,
+  currentIndex: 0,
+  currentShape: [],
 }
 
 // Variável indicando tipos de movimento que serão usados nas funções a seguir.
 var moveLeft = false, 
     moveRight = false, 
     isFixed = false;
+    isPaused = false;
+
+var pieces = [],
+    piecesIndex = 0;
 
 // Canvas do jogo principal
 var canvas = document.getElementById("main-game");
@@ -56,7 +62,7 @@ var ctxNxt = nxt.getContext('2d');
  * @param {*} width - Largura da peça
  * @param {*} height - Altura da peça
  */
-function Piece(x, y, width, height,shape) {
+function Piece(x, y, width, height, shape) {
   this.x = x;
   this.y = y;
   this.width = width;
@@ -64,16 +70,18 @@ function Piece(x, y, width, height,shape) {
   this.shape = shape;
 
   this.update = function(){
-    
     if(this.y < 500 - this.height){
-      this.y += 0.5;
+      this.y += 1;
     }else{
       isFixed = true;
-      //genNextPiece();      
+      gameFlow();      
     }
-    
-    draw(this.x,this.y,this.shape,ctx);
-
+    draw(this.x, this.y, this.shape, ctx);
+  }
+  
+  this.setShape = function(newShape) {
+    this.shape = newShape
+    this.update()
   }
 }
 
@@ -81,22 +89,24 @@ function Piece(x, y, width, height,shape) {
 var nextPiece = genNextPiece();
 
 // Desenha-se essa nova peça gerada
-draw(10,10, nextPiece, ctxNxt, 100);
+draw(nxt.width / 2 - 33, 50, nextPiece, ctxNxt);
 
 var curPiece = genNextPiece();
 
 // Cria-se um objeto para essa peça e o joga no main game.
-var piece = new Piece(tetromino.x,tetromino.y, tetromino.width, tetromino.height, curPiece);
 
+
+//pieces.push(new Piece(tetromino.x, tetromino.y, tetromino.width, tetromino.height, curPiece));
 
 /**
  * Renderiza o jogo
 */
 function render() {
-  requestAnimationFrame(render);
-
-  ctx.clearRect(0,0,canvas.width, canvas.height);
-  piece.update();
+  if(!isPaused){
+    requestAnimationFrame(render);
+    ctx.clearRect(0,0,canvas.width, canvas.height);
+    pieces[piecesIndex].update();
+  }
 }
 
 /**
@@ -119,11 +129,12 @@ function draw(dx, dy, shape, context, center=198) {
   for(var row = 0; row < 4; row++) {
     var column = 0;
     for(column = 0; column < 4;column++) {
+
       if(shape[row][column] != 0){
         context.fillRect(x, y, 33, 33);
         context.fillStyle = 'black';
-        x += 33;
       }
+      x += 33;
     }
     x = dx;
     y+=33;
@@ -163,14 +174,41 @@ function decode(shapeArray) {
  * 
  * @param {object} tetromino - Objeto do Tetrominó atual
  */
-function rotate(tetromino) {
-  tetromino.curIndex ++;
-  
-  if(tetromino.curIndex > 3) {
-    tetromino.curIndex = 0;
+function rotate() {
+  tetromino.currentIndex ++;
+  console.log(tetromino.currentShape)
+  if(tetromino.currentIndex > 3) {
+    tetromino.currentIndex = 0;
   }
+    
+  return pieces[piecesIndex].setShape(decode(tetromino.currentShape[tetromino.currentIndex]));
+}
 
-  return tetromino.shapeMatrix = decode(shapes[tetromino.shape][tetromino.curIndex]);
+var isPlaying = true
+
+function gameFlow() {
+  ctxNxt.clearRect(0,0,ctxNxt.width, ctxNxt.height)
+  if(isFixed) {
+    curPiece = nextPiece;
+    nextPiece = genNextPiece();
+    
+    pieces.push(new Piece(tetromino.x,tetromino.y,tetromino.width, tetromino.height, nextPiece))
+    piecesIndex++
+    isFixed = false
+    nextPiece = genNextPiece()
+    
+    draw(nxt.width / 2 - 33, 50, nextPiece, ctxNxt);
+    
+    isPlaying = false;
+  } else {
+  	if(isPlaying) {
+      var nextPiece = genNextPiece();
+      draw(nxt.width / 2 - 33, 50, nextPiece, ctxNxt);
+      var curPiece = genNextPiece()
+      pieces.push(new Piece(tetromino.x, tetromino.y, tetromino.width, tetromino.height, curPiece))
+    }
+  }
+  pieces[piecesIndex].update()
 }
 
 /**
@@ -186,7 +224,7 @@ function genNextPiece() {
     shapeNames.push(shape);
   }
 
-  pieceName = shapeNames[Math.floor(Math.random() * 4)];
+  pieceName =  "s"; //shapeNames[Math.floor(Math.random() * 4)];
 
   switch (pieceName){
     case 'line':
@@ -202,22 +240,24 @@ function genNextPiece() {
       piece = shapes.square;
       break;
   }
+  tetromino.currentShape = piece;
+  tetromino.currentIndex = Math.floor(Math.random() * 3);
 
-  return decode(piece[Math.floor(Math.random() * 3)]);
+  return decode(piece[tetromino.currentIndex]);
 }
 
 /**
  * Move a peça na direção da tecla que está sendo apertada
  */
-function move(){
+function move() {
   if(moveLeft && !moveRight) {
-    if(piece.x > 0){
-      piece.x -= 5;
+    if(pieces[piecesIndex].x > 0){
+      pieces[piecesIndex].x -= 33;
     }
     moveLeft = false;
   } else {
-    if(piece.x < canvas.width - tetromino.width) {
-      piece.x += 5;
+    if(pieces[piecesIndex].x < canvas.width - tetromino.width) {
+      pieces[piecesIndex].x += 33;
     }
     moveRight = false;
   }
@@ -242,10 +282,15 @@ function keyListener(event) {
     }
   } else if (key === "R" || key === "r") {
     if(!isFixed){
-      //rotate()
+      rotate();
     }
   } else if (key === " ") {
-    //pauseGame()
+    if(!isPaused){
+      isPaused = true;
+    }else{
+      isPaused = false;
+      render();
+    }
   }
 
 }
@@ -254,6 +299,7 @@ function keyListener(event) {
  * Começa o Jogo
  */
 function start(){
+  gameFlow();
   window.addEventListener("keydown",keyListener);
 
   render();
