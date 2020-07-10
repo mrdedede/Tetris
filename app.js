@@ -58,11 +58,13 @@ var tetromino = {
 // Variável indicando tipos de movimento que serão usados nas funções a seguir.
 var moveLeft = false, 
     moveRight = false, 
-    isFixed = false;
-    isPaused = false;
+    isFixed = false,
+    isPaused = false,
+    isPlaying = true;
 
-var pieces = [],
-    piecesIndex = 0;
+var piece,
+    oldPieces = [],
+    oldPiecesIndex = 0;
 
 // Canvas do jogo principal
 var canvas = document.getElementById("main-game");
@@ -98,7 +100,7 @@ function Piece(x, y, width, height, type, shape) {
       isFixed = true;
       gameFlow();      
     }
-    draw(this.x, this.y, this.width, this.height, this.shape, ctx);
+    draw(this.x, this.y, this.shape, ctx);
   }
 
   this.getType = function(){
@@ -115,7 +117,7 @@ function Piece(x, y, width, height, type, shape) {
 var nextPiece = genNextPiece();
 
 // Desenha-se essa nova peça gerada
-draw(nxt.width / 2 - 33, 50, tetromino.width, tetromino.height, nextPiece[1], ctxNxt);
+draw(nxt.width / 2 - 33, 50, nextPiece[1], ctxNxt);
 
 var curPiece = genNextPiece();
 /**
@@ -125,7 +127,10 @@ function render() {
   if(!isPaused){
     requestAnimationFrame(render);
     ctx.clearRect(0,0,canvas.width, canvas.height);
-    pieces[piecesIndex].update();
+    oldPieces.forEach(p=>{
+      draw(p[0],p[1],p[2],ctx)
+    });
+    piece.update();
   }
 }
 
@@ -136,9 +141,11 @@ function render() {
  * @param {number} dy - Posição da peça em Y
  * @param {array} shape - Shape da peça
  * @param {HTMLElement} context - Context do canvas no qual se insere a peça.
- * @param {number} center - Centro do canvas
+ * @param {number} width - Largura da peça
+ * @param {number} height - Altura da peça
+ * 
  */
-function draw(dx, dy, width, height, shape, context) {
+function draw(dx, dy, shape, context, width = 132, height = 132) {
   
   var x = dx, y = dy, row, column, nullX = 0;
 
@@ -198,7 +205,8 @@ function decode(shapeArray) {
 /**
  * Rotaciona o Tetrominó
  * 
- * @param {object} tetromino - Objeto do Tetrominó atual
+ * @param {array} type - Tipo da peça atual
+ * @returns {object} - Peça atual rotacionada
  */
 function rotate(type) {
   tetromino.currentIndex ++;
@@ -207,34 +215,37 @@ function rotate(type) {
     tetromino.currentIndex = 0;
   }
   
-  return pieces[piecesIndex].setShape(decode(type[tetromino.currentIndex]));
+  curPiece[1] = decode(type[tetromino.currentIndex]);
+  
+  return piece.setShape(curPiece[1]);
 }
 
-var isPlaying = true;
+
 
 function gameFlow() {
   ctxNxt.clearRect(0,0, nxt.width, nxt.height);  
 
   if(isFixed) {
+    oldPieces.push([piece.x, piece.y, curPiece[1]]);
+
     curPiece = nextPiece;
-    
-    pieces.push(new Piece(tetromino.x,tetromino.y,tetromino.width, tetromino.height, curPiece[0], curPiece[1]));
-    piecesIndex++;
+    piece = new Piece(tetromino.x,tetromino.y,tetromino.width, tetromino.height, curPiece[0], curPiece[1]);
+    oldPiecesIndex++;
     isFixed = false;
     
     nextPiece = genNextPiece();
-    draw(nxt.width / 2 - 33, 50, tetromino.width, tetromino.height, nextPiece[1], ctxNxt);
+    draw(nxt.width / 2 - 33, 50, nextPiece[1], ctxNxt);
     
     isPlaying = false;
   } else {
   	if(isPlaying) {
       nextPiece = genNextPiece();
-      draw(nxt.width / 2 - 33, 50, tetromino.width, tetromino.height, nextPiece[1], ctxNxt);
-      //curPiece = nextPiece;  
-      pieces.push(new Piece(tetromino.x, tetromino.y, tetromino.width, tetromino.height, curPiece[0], curPiece[1]));
+      draw(nxt.width / 2 - 33, 50, nextPiece[1], ctxNxt);
+      
+      piece = new Piece(tetromino.x, tetromino.y, tetromino.width, tetromino.height, curPiece[0], curPiece[1]);
     }
   }
-  pieces[piecesIndex].update();
+  piece.update();
 }
 
 /**
@@ -286,13 +297,13 @@ function genNextPiece() {
  */
 function move() {
   if(moveLeft && !moveRight) {
-    if(pieces[piecesIndex].x > 0){
-      pieces[piecesIndex].x -= 33;
+    if(piece.x > 0){
+      piece.x -= 33;
     }
     moveLeft = false;
   } else {
-    if(pieces[piecesIndex].x < canvas.width - tetromino.width) {
-      pieces[piecesIndex].x += 33;
+    if(piece.x < canvas.width - tetromino.width) {
+      piece.x += 33;
     } 
     moveRight = false;
   }
@@ -317,7 +328,7 @@ function keyListener(event) {
     }
   } else if (key === "R" || key === "r") {
     if(!isFixed){
-      rotate(pieces[piecesIndex].getType());
+      rotate(piece.getType());
     }
   } else if (key === " ") {
     if(!isPaused){
