@@ -53,7 +53,6 @@ var tetromino = {
   height: 132,
   currentHeight: 0,
   currentIndex: 0,
-  currentShape: [],
 }
 
 // Variável indicando tipos de movimento que serão usados nas funções a seguir.
@@ -80,12 +79,15 @@ var ctxNxt = nxt.getContext('2d');
  * @param {*} y - O valor da peça na coordenada Y
  * @param {*} width - Largura da peça
  * @param {*} height - Altura da peça
+ * @param {*} type - Tipo da peça
+ * @param {*} shape - Formato da peça
  */
-function Piece(x, y, width, height, shape) {
+function Piece(x, y, width, height, type, shape) {
   this.x = x;
   this.y = y;
   this.width = width;
   this.height = height;
+  this.type = type;
   this.shape = shape;
 
   this.update = function(){
@@ -98,6 +100,10 @@ function Piece(x, y, width, height, shape) {
     }
     draw(this.x, this.y, this.width, this.height, this.shape, ctx);
   }
+
+  this.getType = function(){
+    return this.type;
+  }
   
   this.setShape = function(newShape) {
     this.shape = newShape;
@@ -109,7 +115,7 @@ function Piece(x, y, width, height, shape) {
 var nextPiece = genNextPiece();
 
 // Desenha-se essa nova peça gerada
-draw(nxt.width / 2 - 33, 50, tetromino.width, tetromino.height, nextPiece, ctxNxt);
+draw(nxt.width / 2 - 33, 50, tetromino.width, tetromino.height, nextPiece[1], ctxNxt);
 
 var curPiece = genNextPiece();
 /**
@@ -194,14 +200,14 @@ function decode(shapeArray) {
  * 
  * @param {object} tetromino - Objeto do Tetrominó atual
  */
-function rotate() {
+function rotate(type) {
   tetromino.currentIndex ++;
 
   if(tetromino.currentIndex > 3) {
     tetromino.currentIndex = 0;
   }
-    
-  return pieces[piecesIndex].setShape(decode(tetromino.currentShape[tetromino.currentIndex]));
+  
+  return pieces[piecesIndex].setShape(decode(type[tetromino.currentIndex]));
 }
 
 var isPlaying = true;
@@ -212,20 +218,20 @@ function gameFlow() {
   if(isFixed) {
     curPiece = nextPiece;
     
-    pieces.push(new Piece(tetromino.x,tetromino.y,tetromino.width, tetromino.height, curPiece));
+    pieces.push(new Piece(tetromino.x,tetromino.y,tetromino.width, tetromino.height, curPiece[0], curPiece[1]));
     piecesIndex++;
     isFixed = false;
     
     nextPiece = genNextPiece();
-    draw(nxt.width / 2 - 33, 50, tetromino.width, tetromino.height, nextPiece, ctxNxt);
+    draw(nxt.width / 2 - 33, 50, tetromino.width, tetromino.height, nextPiece[1], ctxNxt);
     
     isPlaying = false;
   } else {
   	if(isPlaying) {
       nextPiece = genNextPiece();
-      draw(nxt.width / 2 - 33, 50, tetromino.width, tetromino.height, nextPiece, ctxNxt);
-      curPiece = nextPiece;  
-      pieces.push(new Piece(tetromino.x, tetromino.y, tetromino.width, tetromino.height, curPiece));
+      draw(nxt.width / 2 - 33, 50, tetromino.width, tetromino.height, nextPiece[1], ctxNxt);
+      //curPiece = nextPiece;  
+      pieces.push(new Piece(tetromino.x, tetromino.y, tetromino.width, tetromino.height, curPiece[0], curPiece[1]));
     }
   }
   pieces[piecesIndex].update();
@@ -237,7 +243,7 @@ function gameFlow() {
 function genNextPiece() {
   let shapeNames = [],
       pieceName,
-      piece
+      type
   ;
 
   for(shape in shapes) {
@@ -248,31 +254,31 @@ function genNextPiece() {
 
   switch (pieceName){
     case 'line':
-      piece = shapes.line;
+      type = shapes.line;
       break;
     case 'j':
-      piece = shapes.j;
+      type = shapes.j;
       break;
     case 's':
-      piece = shapes.s;
+      type = shapes.s;
       break;
     case 'l':
-      piece = shapes.l;
+      type = shapes.l;
       break;
     case 't':
-      piece = shapes.t;
+      type = shapes.t;
       break;
     case 'z':
-      piece = shapes.z;
+      type = shapes.z;
       break;
     default:
-      piece = shapes.square;
+      type = shapes.square;
       break;
   }
-  tetromino.currentShape = piece;
+
   tetromino.currentIndex = Math.floor(Math.random() * 3);
 
-  return decode(piece[tetromino.currentIndex]);
+  return [type,decode(type[tetromino.currentIndex])];
 }
 
 /**
@@ -311,7 +317,7 @@ function keyListener(event) {
     }
   } else if (key === "R" || key === "r") {
     if(!isFixed){
-      rotate();
+      rotate(pieces[piecesIndex].getType());
     }
   } else if (key === " ") {
     if(!isPaused){
