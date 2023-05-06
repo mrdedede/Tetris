@@ -1,6 +1,12 @@
 # JavaScript Tetris
 
-This is a simple game of Tetris, made with JavaScript
+A game of Tetris, made for Web Browsers
+
+Originally, this was a project for IF977 at CIn - UFPE
+
+Professor: [Vinícius Garcia](https://viniciusgarcia.me)
+
+Group: [André Filho](https://github.com/mrdedede); [Luís Barbosa](https://github.com/LuisBarbosa99)
 
 ## How can I play it?
 
@@ -23,6 +29,15 @@ Pull requests are welcome, but keep in mind that all of them will be reviewed an
 
 For major changes, however, please oen an issue and be available to discuss it.
 
-Since the docstrings are in Portuguese, it must be hard for non-lusophones to contribute with it.
-We plan to do some sort of translation helper in the wiki of the repo.
+Since the docstrings are in Portuguese, we have a preference for lusophones to contribute with it.
+
+## Mockup
+
+Our goal in the interface for our project was the following one:
+![mockup](https://github.com/mrdedede/Tetris/blob/master/mockup.png)
+
+## End Result
+
+The end result for our project was the following interface:
+![screencapture](https://github.com/mrdedede/Tetris/blob/master/screencapture.png)
 
